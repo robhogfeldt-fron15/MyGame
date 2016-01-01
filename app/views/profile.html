@@ -42,9 +42,14 @@
         <h3 class="text-muted">fireword</h3>
       </div>
 
-      <div id="showstuff">
+      <div class="col-md-6" id="showstuff">
 
 append message here
+</div>
+
+<div class="col-md-6" id="showusers">
+
+
 </div>
 
 
@@ -65,7 +70,9 @@ append message here
 
       </div>
 
-
+      <div class="col-xs-12 playerOne">
+      <img src="http://salestores.com/stores/images/images_747/SB2326.jpg" />
+      </div>
 
 
       <div  class="footer">
@@ -114,4 +121,12 @@ append message here
     <!-- Javascript -->
 
   </body>
+  <script>
+  $(function() {
+    // Basic usage of .once() to read the data located at firebaseRef.
+listLoggedInUsers();
+// handle read data.
+});
+
+  </script>
 </html>
