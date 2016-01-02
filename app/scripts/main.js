@@ -1,3 +1,18 @@
+//SENTENCES
+var data={"sentences":[
+        {
+            "first":"gubbe",
+            "second":"kör",
+            "third":"bil"
+        },
+        {
+            "first":"kvinna",
+            "second":"skjuter",
+            "third":"älg"
+        }
+]}
+
+var choosenSentence;
 // CREATE A REFERENCE TO FIREBASE
 var rootUrl = "https://fron15game.firebaseio.com/"
 var dbRef = new Firebase('https://fron15game.firebaseio.com/');
@@ -26,7 +41,8 @@ if (error) {
 } else {
     console.log("Successfully created user account with uid:", userData.uid);
     var newUser = {
-      email: $("#email").val()
+      email: $("#email").val(),
+
     };
   this.saveUser(userData.uid,newUser)
  }
@@ -54,58 +70,106 @@ password    : $("#pwd").val(),
 })
 });
 
+
 function listLoggedInUsers() {
   var list = $('<ul/>').appendTo('#showusers');
-dbRef.child("users").once('value', function(dataSnapshot) {
+      dbRef.child("users").once('value', function(dataSnapshot) {
 
-var users = dataSnapshot.val();
+  var users = dataSnapshot.val();
 
-if (users) {
-  jQuery.each(users, function(i, val) {
-  var me =  dbRef.getAuth().password.email;
-    if (val.email !== me) {
-      list.append('<li class="playUser">' + val.email +'</li>');
-      $( ".playUser" ).on( "click", function() {
-      createGame( me, val.email );
-  });
+  if (users) {
+    jQuery.each(users, function(i, val) {
+    var me =  dbRef.getAuth().password.email;
+      if (val.email !== me) {
+
+        var li = $('<li/>')
+            .addClass('playUser')
+            .appendTo(list)
+            .text(val.email);
+
+
+            $(li).on("click", function() {
+
+          createGame(this);
+
+          });
+        }
+
+
+      });
     }
 
-
-    });
-}
-
-
-
-  console.log(users);
 });
 }
 
-function createGame(playerOne, playerTwo ) {
-  // body...
-  var newGameRef = dbRef.child("game");
-  newGameRef.set({
-
-      playerOne : playerOne,
-      playerTwo : playerTwo
-
-  });
-
-}
+var me =  dbRef.getAuth();
+var userRef = new Firebase(rootUrl + "/users/" + me.uid + '/');
+var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
+console.log(userRef.toString());
 
 
 
-var data={"sentences":[
-        {
-            "first":"gubbe",
-            "second":"kör",
-            "third":"bil"
-        },
-        {
-            "first":"kvinna",
-            "second":"skjuter",
-            "third":"älg"
-        }
-]}
+var createGame =  function(opp) {
+  // body..
+  var onComplete = function(error) {
+  if (error) {
+    console.log('Synchronization failed');
+  } else {
+    console.log('Synchronization succeeded');
+  }
+
+
+  }
+
+
+  userRef.child('games').push({
+    game: {
+
+      opp : $(opp).html()},
+    } ,onComplete)
+
+    userRef.child('games').on("child_added", function(snapshot) {
+  var opponent = snapshot.val();
+  console.log(opponent.game.opp);
+  if (dbRef.getAuth().password.email === opponent.game.opp) {
+    console.log("sssss");
+  }
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
+
+};
+
+
+
+userRef.child('games').on("child_added", function(snapshot) {
+  var opponent = snapshot.val();
+  console.log(snapshot.val());
+  if (dbRef.getAuth().password.email === opponent.game.opp) {
+    console.log("sssss");
+  }
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
+
+
+
+// newGameRef.on("child_changed", function(snapshot) {
+//   var thisUser = dbRef.getAuth().password.email;
+//   var players = snapshot.val();
+//
+// if (thisUser === players.playerOne.name) {
+//   $('.hideForpOne').css('display', 'none');
+//
+// }else {
+//     $('.hideForpTwo').css('display', 'none');
+// }
+//
+//
+//
+// });
+
+
 
 
 
@@ -115,7 +179,9 @@ var data={"sentences":[
 $('#startBtn').on('click', function(){
 
 array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
+choosenSentence = array;
 console.log(array);
+$('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
 var gamewordRef = dbRef.child("gameword");
 gamewordRef.set({
   array
@@ -145,11 +211,11 @@ $.each(array, function( i, l ){
 
   });
 
-if (dbRef.getAuth().password.email = "test@hot.se") {
-$(".playerOne").css("display: none");
-}
 
 });
+
+
+
 
 function createPlayBricks(word) {
 
