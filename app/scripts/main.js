@@ -1,3 +1,5 @@
+
+
 //SENTENCES
 var data={"sentences":[
         {
@@ -29,6 +31,14 @@ var thirdWord = [];
 var word=[];
 var array = [];
 
+$(document).ready(function(){
+dbRef.child("users/gameinvite").on("child_added",
+  function(newMessageSnapshot) {
+  alert('sdsd');
+  }
+);
+});
+
 //REGISTER NEW USER
 $("#regUser").on("click", function(){
 dbRef.createUser({
@@ -42,7 +52,7 @@ if (error) {
     console.log("Successfully created user account with uid:", userData.uid);
     var newUser = {
       email: $("#email").val(),
-
+      uid: userData.uid
     };
   this.saveUser(userData.uid,newUser)
  }
@@ -79,38 +89,44 @@ function listLoggedInUsers() {
 
   if (users) {
     jQuery.each(users, function(i, val) {
+      var li;
     var me =  dbRef.getAuth().password.email;
       if (val.email !== me) {
 
         var li = $('<li/>')
+        .attr('id', users[i].uid)
             .addClass('playUser')
             .appendTo(list)
-            .text(val.email);
+            .text(val.email)
 
 
-            $(li).on("click", function() {
 
-          createGame(this);
-
-          });
         }
 
 
       });
-    }
 
+    }
+    $('#showusers').on('click','li', function(e){
+      var opp = e.target.innerHTML;
+      var uid = e.target.id;
+      console.log(uid);
+        createGame(opp, uid);
+    });
 });
 }
 
 var me =  dbRef.getAuth();
+var allUserRef = new Firebase(rootUrl + "/users/");
 var userRef = new Firebase(rootUrl + "/users/" + me.uid + '/');
 var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
 console.log(userRef.toString());
 
 
 
-var createGame =  function(opp) {
+var createGame =  function(oppo, uid) {
   // body..
+
   var onComplete = function(error) {
   if (error) {
     console.log('Synchronization failed');
@@ -125,32 +141,26 @@ var createGame =  function(opp) {
   userRef.child('games').push({
     game: {
 
-      opp : $(opp).html()},
+      opp : oppo},
     } ,onComplete)
 
-    userRef.child('games').on("child_added", function(snapshot) {
-  var opponent = snapshot.val();
-  console.log(opponent.game.opp);
-  if (dbRef.getAuth().password.email === opponent.game.opp) {
-    console.log("sssss");
-  }
-}, function (errorObject) {
-  console.log("The read failed: " + errorObject.code);
-});
 
+allUserRef.child(uid).child("gameinvite").push("Hi other user!");
 };
 
 
 
-userRef.child('games').on("child_added", function(snapshot) {
-  var opponent = snapshot.val();
-  console.log(snapshot.val());
-  if (dbRef.getAuth().password.email === opponent.game.opp) {
-    console.log("sssss");
-  }
-}, function (errorObject) {
-  console.log("The read failed: " + errorObject.code);
-});
+// userRef.child('games').on("child_added", function(snapshot) {
+//   var me = dbRef.getAuth();
+//
+//   var opponent = snapshot.val();
+//   console.log(snapshot.val());
+//   if (me.password.email ===  opponent.game.opp) {
+//     console.log('its me');
+//   }
+// }, function (errorObject) {
+//   console.log("The read failed: " + errorObject.code);
+// });
 
 
 
@@ -183,9 +193,15 @@ choosenSentence = array;
 console.log(array);
 $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
 var gamewordRef = dbRef.child("gameword");
-gamewordRef.set({
-  array
+gameRef.endAt().limitToFirst(1).on('child_added', function(snapshot) {
+
+   // all records after the last continue to invoke this function
+   console.log(snapshot.val());
+
 });
+// gameRef.child('').push({
+//   array
+// });
 
 var playerwordRef = dbRef.child("playerword");
 playerwordRef.set({
