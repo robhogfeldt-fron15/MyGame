@@ -31,13 +31,7 @@ var thirdWord = [];
 var word=[];
 var array = [];
 
-$(document).ready(function(){
-dbRef.child("users/gameinvite").on("child_added",
-  function(newMessageSnapshot) {
-  alert('sdsd');
-  }
-);
-});
+
 
 //REGISTER NEW USER
 $("#regUser").on("click", function(){
@@ -118,9 +112,9 @@ function listLoggedInUsers() {
 
 var me =  dbRef.getAuth();
 var allUserRef = new Firebase(rootUrl + "/users/");
-var userRef = new Firebase(rootUrl + "/users/" + me.uid + '/');
+// var userRef = new Firebase(rootUrl + "/users/" + me.uid + '/');
 var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
-console.log(userRef.toString());
+
 
 
 
@@ -138,18 +132,19 @@ var createGame =  function(oppo, uid) {
   }
 
 
-  userRef.child('games').push({
-    game: {
-
-      opp : oppo},
-    } ,onComplete)
 
 
 allUserRef.child(uid).child("gameinvite").push("Hi other user!");
 };
 
 
-
+dbRef.child("users/" + me.uid +"/gameinvite").on("child_added",
+  function(newMessageSnapshot) {
+    var t = newMessageSnapshot.val();
+  alert('sdsd');
+  $('#startBtn').click();
+  }
+);
 // userRef.child('games').on("child_added", function(snapshot) {
 //   var me = dbRef.getAuth();
 //
@@ -192,16 +187,6 @@ array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 choosenSentence = array;
 console.log(array);
 $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
-var gamewordRef = dbRef.child("gameword");
-gameRef.endAt().limitToFirst(1).on('child_added', function(snapshot) {
-
-   // all records after the last continue to invoke this function
-   console.log(snapshot.val());
-
-});
-// gameRef.child('').push({
-//   array
-// });
 
 var playerwordRef = dbRef.child("playerword");
 playerwordRef.set({
