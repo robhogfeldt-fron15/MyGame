@@ -125,14 +125,18 @@ var createGame =  function(oppo, uid) {
 allUserRef.child(uid).child("gameinvite").push("Hi other user!");
 };
 
+// var newItems = false;
+// dbRef.child("users/" + me.uid +"/gameinvite").on("child_added", function(message) {
+//   if (!newItems) return;
+//    var message = message.val();
+//    alert(message);
+//    createWordPlan();
+//  });
+//  dbRef.child("users/" + me.uid +"/gameinvite").once('value', function(messages) {
+//    newItems = true;
+//  });
 
-dbRef.child("users/" + me.uid +"/gameinvite").on("child_added",
-  function(newMessageSnapshot) {
-    var t = newMessageSnapshot.val();
-  alert('sdsd');
-  $('#startBtn').click();
-  }
-);
+
 // userRef.child('games').on("child_added", function(snapshot) {
 //   var me = dbRef.getAuth();
 //
@@ -166,42 +170,70 @@ dbRef.child("users/" + me.uid +"/gameinvite").on("child_added",
 
 
 
+ function createWordPlan() {
+  // body...
+  array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
+  $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
 
-
-$('#startBtn').on('click', function(){
-
-array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
-choosenSentence = array;
-console.log(array);
-$('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
-
-var playerwordRef = dbRef.child("playerword");
-playerwordRef.set({
-  first:{
-    word : [],
-    correctWord : array.first
-  },
-  second:{
-    word : [],
-    correctWord : array.second
-  },
-  third:{
-    word : [],
-    correctWord : array.third
-  }
-});
-
-$.each(array, function( i, l ){
-    var line = "#" + i;
-    var length = l.length;
-    createPlayBricks(array[i]);
-    createBricks( line, length );
-
+  var playerwordRef = dbRef.child("playerword");
+  playerwordRef.set({
+    first:{
+      word : [],
+      correctWord : array.first
+    },
+    second:{
+      word : [],
+      correctWord : array.second
+    },
+    third:{
+      word : [],
+      correctWord : array.third
+    }
   });
 
+  $.each(array, function( i, l ){
+      var line = "#" + i;
+      var length = l.length;
+      createPlayBricks(array[i]);
+      createBricks( line, length );
 
-});
+    });
+}
+
+
+// $('#startBtn').on('click', function(){
+//
+// array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
+//
+// $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
+//
+// var playerwordRef = dbRef.child("playerword");
+// playerwordRef.set({
+//   first:{
+//     word : [],
+//     correctWord : array.first
+//   },
+//   second:{
+//     word : [],
+//     correctWord : array.second
+//   },
+//   third:{
+//     word : [],
+//     correctWord : array.third
+//   }
+// });
+//
+// $.each(array, function( i, l ){
+//     var line = "#" + i;
+//     var length = l.length;
+//     createPlayBricks(array[i]);
+//     createBricks( line, length );
+//
+//   });
+//
+//
+// });
 
 
 
