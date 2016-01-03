@@ -142,10 +142,10 @@ $(document).ready(function(){
 
    dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").on("child_added", function(message) {
      if (!newItems) return;
-      var inviteId = message.key();
-      var sender = message.val();
 
-      createPaintPlan(sender, inviteId, sendResponse);
+      var message = message.val();
+
+      createPaintPlan(message);
     });
     dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").once('value', function(messages) {
       response = true;
@@ -238,9 +238,11 @@ callback(sender, sentence);
 
 function createPaintPlan(argument) {
   // body...
-
+document.getElementById('drawing-canvas').innerHTML = "";
+  var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
   var pixelDataRef = new Firebase(rootUrl).child('draw');
   var myCanvas = document.getElementById('drawing-canvas');
+  myCanvas.empty();
  var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
  if (myContext == null) {
    alert("You must use a browser that supports HTML5 Canvas to run this demo.");
@@ -314,8 +316,8 @@ function createPaintPlan(argument) {
  pixelDataRef.on('child_added', drawPixel);
  pixelDataRef.on('child_changed', drawPixel);
  pixelDataRef.on('child_removed', clearPixel);
-});
-}
+};
+
 
 // $('#startBtn').on('click', function(){
 //
