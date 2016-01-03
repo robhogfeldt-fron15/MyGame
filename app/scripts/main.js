@@ -121,18 +121,6 @@ var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
 var createGame =  function(oppo, uid) {
   // body..
 
-  var onComplete = function(error) {
-  if (error) {
-    console.log('Synchronization failed');
-  } else {
-    console.log('Synchronization succeeded');
-  }
-
-
-  }
-
-
-
 
 allUserRef.child(uid).child("gameinvite").push("Hi other user!");
 };
