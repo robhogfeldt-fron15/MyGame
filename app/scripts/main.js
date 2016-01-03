@@ -122,9 +122,35 @@ var createGame =  function(oppo, uid) {
   // body..
 
 
-allUserRef.child(uid).child("gameinvite").push("Hi other user!");
+allUserRef.child(uid).child("gameinvite").push({from: dbRef.getAuth().uid});
 };
 
+
+$(document).ready(function(){
+  var newItems = false;
+  var response = false;
+  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_added", function(message) {
+    if (!newItems) return;
+     var inviteId = message.key();
+     var sender = message.val();
+
+     createWordPlan(sender, inviteId, sendResponse);
+   });
+   dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
+     newItems = true;
+   });
+
+   dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").on("child_added", function(message) {
+     if (!newItems) return;
+      var inviteId = message.key();
+      var sender = message.val();
+
+      createPaintPlan(sender, inviteId, sendResponse);
+    });
+    dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").once('value', function(messages) {
+      response = true;
+    });
+});
 // var newItems = false;
 // dbRef.child("users/" + me.uid +"/gameinvite").on("child_added", function(message) {
 //   if (!newItems) return;
@@ -166,15 +192,20 @@ allUserRef.child(uid).child("gameinvite").push("Hi other user!");
 //
 // });
 
+function sendResponse(sender, sentence) {
+  // body...
+
+
+  allUserRef.child(sender.from).child("gameresponse").push({sentence: sentence});
+}
 
 
 
-
- function createWordPlan() {
+ function createWordPlan(sender,inviteId, callback) {
   // body...
   array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
-  $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
+
 
   var playerwordRef = dbRef.child("playerword");
   playerwordRef.set({
@@ -199,8 +230,92 @@ allUserRef.child(uid).child("gameinvite").push("Hi other user!");
       createBricks( line, length );
 
     });
+
+var sentence = array.first +" "+ array.second +" "+ array.third;
+callback(sender, sentence);
 }
 
+
+function createPaintPlan(argument) {
+  // body...
+
+  var pixelDataRef = new Firebase(rootUrl).child('draw');
+  var myCanvas = document.getElementById('drawing-canvas');
+ var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
+ if (myContext == null) {
+   alert("You must use a browser that supports HTML5 Canvas to run this demo.");
+   return;
+ }
+
+ //Setup each color palette & add it to the screen
+ var colors = ["fff","000","f00","0f0","00f","88f","f8d","f88","f05","f80","0f8","cf0","08f","408","ff8","8ff"];
+ for (c in colors) {
+   var item = $('<div/>').css("background-color", '#' + colors[c]).addClass("colorbox");
+   item.click((function () {
+     var col = colors[c];
+     return function () {
+       currentColor = col;
+     };
+   })());
+   item.appendTo('#colorholder');
+ }
+
+ //Keep track of if the mouse is up or down
+ myCanvas.onmousedown = function () {mouseDown = 1;};
+ myCanvas.onmouseout = myCanvas.onmouseup = function () {
+   mouseDown = 0; lastPoint = null;
+ };
+
+ //Draw a line from the mouse's last position to its current position
+ var drawLineOnMouseMove = function(e) {
+   if (!mouseDown) return;
+
+   e.preventDefault();
+
+   // Bresenham's line algorithm. We use this to ensure smooth lines are drawn
+   var offset = $('canvas').offset();
+   var x1 = Math.floor((e.pageX - offset.left) / pixSize - 1),
+     y1 = Math.floor((e.pageY - offset.top) / pixSize - 1);
+   var x0 = (lastPoint == null) ? x1 : lastPoint[0];
+   var y0 = (lastPoint == null) ? y1 : lastPoint[1];
+   var dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+   var sx = (x0 < x1) ? 1 : -1, sy = (y0 < y1) ? 1 : -1, err = dx - dy;
+   while (true) {
+     //write the pixel into Firebase, or if we are drawing white, remove the pixel
+     pixelDataRef.child(x0 + ":" + y0).set(currentColor === "fff" ? null : currentColor);
+
+     if (x0 == x1 && y0 == y1) break;
+     var e2 = 2 * err;
+     if (e2 > -dy) {
+       err = err - dy;
+       x0 = x0 + sx;
+     }
+     if (e2 < dx) {
+       err = err + dx;
+       y0 = y0 + sy;
+     }
+   }
+   lastPoint = [x1, y1];
+ };
+ $(myCanvas).mousemove(drawLineOnMouseMove);
+ $(myCanvas).mousedown(drawLineOnMouseMove);
+
+ // Add callbacks that are fired any time the pixel data changes and adjusts the canvas appropriately.
+ // Note that child_added events will be fired for initial pixel data as well.
+ var drawPixel = function(snapshot) {
+   var coords = snapshot.key().split(":");
+   myContext.fillStyle = "#" + snapshot.val();
+   myContext.fillRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
+ };
+ var clearPixel = function(snapshot) {
+   var coords = snapshot.key().split(":");
+   myContext.clearRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
+ };
+ pixelDataRef.on('child_added', drawPixel);
+ pixelDataRef.on('child_changed', drawPixel);
+ pixelDataRef.on('child_removed', clearPixel);
+});
+}
 
 // $('#startBtn').on('click', function(){
 //
