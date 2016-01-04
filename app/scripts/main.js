@@ -120,9 +120,10 @@ var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
 
 var createGame =  function(oppo, uid) {
   // body..
+var array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
-
-allUserRef.child(uid).child("gameinvite").push({from: dbRef.getAuth().uid});
+allUserRef.child(uid).child("gameinvite").push({from: dbRef.getAuth().uid, word: array});
+createPaintPlan(array.join(""));
 };
 
 
@@ -294,76 +295,23 @@ $(document).ready(function(){
      var inviteId = message.key();
      var sender = message.val();
 
-     createWordPlan(sender,  sendResponse);
+     createWordPlan(sender,  sender.word);
    });
    dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
      newItems = true;
    });
 
-   dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").on("child_added", function(message) {
-     if (!newItems) return;
 
-      var message = message.val();
-
-      createPaintPlan(message);
-    });
-    dbRef.child("users/" + dbRef.getAuth().uid +"/gameresponse").once('value', function(messages) {
-      response = true;
-    });
 });
-// var newItems = false;
-// dbRef.child("users/" + me.uid +"/gameinvite").on("child_added", function(message) {
-//   if (!newItems) return;
-//    var message = message.val();
-//    alert(message);
-//    createWordPlan();
-//  });
-//  dbRef.child("users/" + me.uid +"/gameinvite").once('value', function(messages) {
-//    newItems = true;
-//  });
-
-
-// userRef.child('games').on("child_added", function(snapshot) {
-//   var me = dbRef.getAuth();
-//
-//   var opponent = snapshot.val();
-//   console.log(snapshot.val());
-//   if (me.password.email ===  opponent.game.opp) {
-//     console.log('its me');
-//   }
-// }, function (errorObject) {
-//   console.log("The read failed: " + errorObject.code);
-// });
 
 
 
-// newGameRef.on("child_changed", function(snapshot) {
-//   var thisUser = dbRef.getAuth().password.email;
-//   var players = snapshot.val();
-//
-// if (thisUser === players.playerOne.name) {
-//   $('.hideForpOne').css('display', 'none');
-//
-// }else {
-//     $('.hideForpTwo').css('display', 'none');
-// }
-//
-//
-//
-// });
 
-function sendResponse(sender, sentence) {
+
+
+ function createWordPlan(sender, array) {
   // body...
 
-
-  allUserRef.child(sender.from).child("gameresponse").push({sentence: sentence});
-}
-
-
-
- function createWordPlan(sender, callback) {
-  // body...
-  array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
 
 
@@ -391,8 +339,8 @@ function sendResponse(sender, sentence) {
 
     });
 
-var sentence = array.first +" "+ array.second +" "+ array.third;
-callback(sender, sentence);
+
+
 }
 
 
