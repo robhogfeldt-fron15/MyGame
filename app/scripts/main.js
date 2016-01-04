@@ -123,44 +123,14 @@ var createGame =  function(oppo, uid) {
 var array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
 allUserRef.child(uid).child("gameinvite").push({from: dbRef.getAuth().uid, word: array});
-createPaintPlan(array.join(""));
+var nessage = array.first + array.second + array.third;
+var pixelDataRef = new Firebase(rootUrl).child("draw");
+pixelDataRef.remove();
+createPaintPlan(message);
 };
 
 
 
-
-// $('#startBtn').on('click', function(){
-//
-// array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
-//
-// $('.playerOne').text(array.first +" "+ array.second +" "+ array.third);
-//
-// var playerwordRef = dbRef.child("playerword");
-// playerwordRef.set({
-//   first:{
-//     word : [],
-//     correctWord : array.first
-//   },
-//   second:{
-//     word : [],
-//     correctWord : array.second
-//   },
-//   third:{
-//     word : [],
-//     correctWord : array.third
-//   }
-// });
-//
-// $.each(array, function( i, l ){
-//     var line = "#" + i;
-//     var length = l.length;
-//     createPlayBricks(array[i]);
-//     createBricks( line, length );
-//
-//   });
-//
-//
-// });
 
 
 
@@ -220,11 +190,17 @@ function createBricks(line, length) {
 }
 
 
-var playerwordRef = new Firebase('https://fron15game.firebaseio.com/playerword/');
+
 
 function updateFirebaseAdd(myWord, parentId) {
+  var correct ="";
+  var playerwordRef = new Firebase('https://fron15game.firebaseio.com/playerword/' + parentId);
+playerwordRef.once("value", function(argument) {
+  // body...
+  var arg = argument.val();
+  correct = arg.correctWord;
+})
 
-var playerwordRef = new Firebase('https://fron15game.firebaseio.com/playerword/' + parentId);
 switch(parentId) {
   case "first":
       playerwordRef.update({ first: myWord.word})
@@ -239,12 +215,15 @@ switch(parentId) {
       console.log("none");
 }
 
+
+
 // TODO: Cchange CSS if word is correct
 playerwordRef.on("child_changed", function(snapshot) {
   var newWord = snapshot.val();
 
-  if (newWord.join("") === myWord.correctWord) {
-  console.log("newWord)");
+  console.log(newWord);
+  if (newWord.join("") === correct) {
+  console.log("newWod)");
   }
 
 });
@@ -292,10 +271,10 @@ $(document).ready(function(){
   var response = false;
   dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_added", function(message) {
     if (!newItems) return;
-     var inviteId = message.key();
-     var sender = message.val();
 
-     createWordPlan(sender,  sender.word);
+     var sender = message.val();
+console.log(sender);
+     createWordPlan(sender.word);
    });
    dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
      newItems = true;
@@ -309,11 +288,7 @@ $(document).ready(function(){
 
 
 
- function createWordPlan(sender, array) {
-  // body...
-
-
-
+ function createWordPlan(array) {
 
   var playerwordRef = dbRef.child("playerword");
   playerwordRef.set({
@@ -338,8 +313,21 @@ $(document).ready(function(){
       createBricks( line, length );
 
     });
+    var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
+    var pixelDataRef = new Firebase(rootUrl).child('draw');
+
+    var myCanvas = document.getElementById('drawing-canvas');
+
+   var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
+   if (myContext == null) {
+     alert("You must use a browser that supports HTML5 Canvas to run this demo.");
+     return;
+   }
 
 
+   pixelDataRef.on('child_added', drawPixel);
+   pixelDataRef.on('child_changed', drawPixel);
+   pixelDataRef.on('child_removed', clearPixel);
 
 }
 
