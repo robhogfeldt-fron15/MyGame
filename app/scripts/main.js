@@ -112,14 +112,14 @@ function listLoggedInUsers() {
 
 //CREATE GAME WITH CLICKED PLAYER
 var createGame =  function(uid) {
-
 var array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
-
-allUserRef.child(uid).child("gameinvite").set({from: dbRef.getAuth().uid, word: array});
+    //SEND INVITE TO USER
+    allUserRef.child(uid).child("gameinvite").set({from: dbRef.getAuth().uid, word: array});
 var message = array.first + " " + array.second + " " + array.third;
+//CLEAR OLD CANVAS
 var pixelDataRef = new Firebase(rootUrl).child("draw");
-pixelDataRef.remove();
-createPaintPlan(message);
+    pixelDataRef.remove();
+    createPaintPlan(message);
 };
 
 
@@ -127,7 +127,7 @@ createPaintPlan(message);
 
 
 
-
+//CREATE CHARS
 function createPlayBricks(word) {
 
   var cList = $('#chars')
@@ -147,7 +147,7 @@ function createPlayBricks(word) {
       }
 
 
-
+//CREATE BOARD
 function createBricks(line, length) {
 
     var line = $(line);
@@ -226,8 +226,6 @@ playerwordRef.on("child_changed", function(snapshot) {
 
 
 function switchResult(line, char, dropIndex){
-
-
   switch(line) {
     case "first":
         firstWord[dropIndex] = char;
@@ -259,21 +257,19 @@ function switchResult(line, char, dropIndex){
 }
 }
 
+//SET-UP FIREBASE-LISTENERS
 $(document).ready(function(){
-  var newItems = false;
-  var response = false;
-  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_changed", function(message) {
-    if (!newItems) return;
+  $('.container-canvas').css('display', 'none');
+  $('#chars').css('display', 'none');
+  $('#message').css('display', 'none');
+
+  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_added", function(message) {
+
 
      var sender = message.val();
 
      createWordPlan(sender);
    });
-   dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
-     newItems = true;
-   });
-
-
 });
 
 
@@ -286,6 +282,9 @@ $(document).ready(function(){
   $('#first').empty();
   $('#second').empty();
   $('#third').empty();
+  $('#chars').css('display', 'block');
+  $('#message').css('display', 'block');
+
   var playerwordRef = dbRef.child("playerword");
   playerwordRef.set({
     first:{
@@ -341,7 +340,7 @@ function createPaintPlan(message) {
 $('#role').text(message);
 $('#chars').css('display', 'none');
 $('#message').css('display', 'none');
-
+$('.container-canvas').css('display', 'block');
   var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
   var pixelDataRef = new Firebase(rootUrl).child('draw');
   var myCanvas = document.getElementById('drawing-canvas');
