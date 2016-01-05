@@ -122,7 +122,7 @@ var createGame =  function(oppo, uid) {
   // body..
 var array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
-allUserRef.child(uid).child("gameinvite").push({from: dbRef.getAuth().uid, word: array});
+allUserRef.child(uid).child("gameinvite").set({from: dbRef.getAuth().uid, word: array});
 var nessage = array.first + array.second + array.third;
 var pixelDataRef = new Firebase(rootUrl).child("draw");
 pixelDataRef.remove();
@@ -269,12 +269,12 @@ function switchResult(line, char, dropIndex){
 $(document).ready(function(){
   var newItems = false;
   var response = false;
-  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_added", function(message) {
+  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_changed", function(message) {
     if (!newItems) return;
 
      var sender = message.val();
 console.log(sender);
-     createWordPlan(sender.word);
+     createWordPlan(sender);
    });
    dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
      newItems = true;
@@ -324,7 +324,15 @@ console.log(sender);
      return;
    }
 
-
+   var drawPixel = function(snapshot) {
+     var coords = snapshot.key().split(":");
+     myContext.fillStyle = "#" + snapshot.val();
+     myContext.fillRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
+   };
+   var clearPixel = function(snapshot) {
+     var coords = snapshot.key().split(":");
+     myContext.clearRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
+   };
    pixelDataRef.on('child_added', drawPixel);
    pixelDataRef.on('child_changed', drawPixel);
    pixelDataRef.on('child_removed', clearPixel);
