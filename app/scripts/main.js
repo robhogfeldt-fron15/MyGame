@@ -263,7 +263,7 @@ $(document).ready(function(){
   $('#chars').css('display', 'none');
   $('#message').css('display', 'none');
 
-  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_added", function(message) {
+  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_changed", function(message) {
 
 
      var sender = message.val();
