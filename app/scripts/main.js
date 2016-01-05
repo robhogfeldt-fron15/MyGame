@@ -8,9 +8,9 @@ var data={"sentences":[
             "third":"bil"
         },
         {
-            "first":"kvinna",
-            "second":"skjuter",
-            "third":"älg"
+            "first":"man",
+            "second":"äter",
+            "third":"mat"
         }
 ]}
 
@@ -223,7 +223,7 @@ playerwordRef.on("child_changed", function(snapshot) {
 
   console.log(newWord);
   if (newWord.join("") === correct) {
-  console.log("newWod)");
+  $('#third').css('background-color', 'green');
   }
 
 });
@@ -273,7 +273,7 @@ $(document).ready(function(){
     if (!newItems) return;
 
      var sender = message.val();
-console.log(sender);
+
      createWordPlan(sender);
    });
    dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").once('value', function(messages) {
@@ -289,7 +289,10 @@ console.log(sender);
 
 
  function createWordPlan(array) {
-
+  $('#chars').empty();
+  $('#first').empty();
+  $('#second').empty();
+  $('#third').empty();
   var playerwordRef = dbRef.child("playerword");
   playerwordRef.set({
     first:{
