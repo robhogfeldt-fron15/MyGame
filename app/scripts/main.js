@@ -14,10 +14,14 @@ var data={"sentences":[
         }
 ]}
 
-var choosenSentence;
+
 // CREATE A REFERENCE TO FIREBASE
+
 var rootUrl = "https://fron15game.firebaseio.com/"
 var dbRef = new Firebase('https://fron15game.firebaseio.com/');
+var allUserRef = new Firebase(rootUrl + "/users/");
+var me =  dbRef.getAuth();
+
 
 // REGISTER DOM ELEMENTS
 var emailField = $('#email');
@@ -30,10 +34,10 @@ var secondWord = [];
 var thirdWord = [];
 var word=[];
 var array = [];
+var choosenSentence;
 
 
-
-//REGISTER NEW USER
+//REGISTER / LOGIN USERS
 $("#regUser").on("click", function(){
 dbRef.createUser({
 email    : $("#email").val(),
@@ -74,56 +78,45 @@ password    : $("#pwd").val(),
 })
 });
 
-
+//GET ALL LOGGED IN USERS
 function listLoggedInUsers() {
   var list = $('<ul/>').appendTo('#showusers');
       dbRef.child("users").once('value', function(dataSnapshot) {
 
   var users = dataSnapshot.val();
-
   if (users) {
     jQuery.each(users, function(i, val) {
-      var li;
+    var li;
     var me =  dbRef.getAuth().password.email;
       if (val.email !== me) {
-
         var li = $('<li/>')
         .attr('id', users[i].uid)
             .addClass('playUser')
             .appendTo(list)
             .text(val.email)
-
-
-
         }
-
-
       });
-
     }
+
     $('#showusers').on('click','li', function(e){
-      var opp = e.target.innerHTML;
       var uid = e.target.id;
-      console.log(uid);
-        createGame(opp, uid);
+        createGame(uid);
     });
 });
 }
 
-var me =  dbRef.getAuth();
-var allUserRef = new Firebase(rootUrl + "/users/");
-// var userRef = new Firebase(rootUrl + "/users/" + me.uid + '/');
-var gameRef = new Firebase(rootUrl + "/users/" + me.uid + '/games/');
 
 
 
 
-var createGame =  function(oppo, uid) {
-  // body..
+
+//CREATE GAME WITH CLICKED PLAYER
+var createGame =  function(uid) {
+
 var array = data.sentences[Math.floor(Math.random()*data.sentences.length)];
 
 allUserRef.child(uid).child("gameinvite").set({from: dbRef.getAuth().uid, word: array});
-var nessage = array.first + array.second + array.third;
+var message = array.first + " " + array.second + " " + array.third;
 var pixelDataRef = new Firebase(rootUrl).child("draw");
 pixelDataRef.remove();
 createPaintPlan(message);
@@ -287,7 +280,7 @@ $(document).ready(function(){
 
 
 
-
+//FOR SPELLING PLAYER
  function createWordPlan(array) {
   $('#chars').empty();
   $('#first').empty();
@@ -314,11 +307,10 @@ $(document).ready(function(){
       var length = l.length;
       createPlayBricks(array[i]);
       createBricks( line, length );
-
     });
-    var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
-    var pixelDataRef = new Firebase(rootUrl).child('draw');
 
+    var pixSize = 8, lastPoint = null, currentColor = "000"
+    var pixelDataRef = new Firebase(rootUrl).child('draw');
     var myCanvas = document.getElementById('drawing-canvas');
 
    var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
@@ -343,12 +335,15 @@ $(document).ready(function(){
 }
 
 
+//FOR PAINTING PLAYER
 function createPaintPlan(message) {
-  // body...
-$('#message').text(message.sentence);
+
+$('#role').text(message);
+$('#chars').css('display', 'none');
+$('#message').css('display', 'none');
+
   var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
   var pixelDataRef = new Firebase(rootUrl).child('draw');
-
   var myCanvas = document.getElementById('drawing-canvas');
 
  var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
@@ -357,7 +352,7 @@ $('#message').text(message.sentence);
    return;
  }
 
- //Setup each color palette & add it to the screen
+
  var colors = ["fff","000","f00","0f0","00f","88f","f8d","f88","f05","f80","0f8","cf0","08f","408","ff8","8ff"];
  for (c in colors) {
    var item = $('<div/>').css("background-color", '#' + colors[c]).addClass("colorbox");
