@@ -221,7 +221,7 @@ playerwordRef.on("child_changed", function(snapshot) {
 
   console.log(newWord);
   if (newWord.join("") === correct) {
-  $('#third').css('background-color', 'green');
+  alert("Ordet stämmer!")
   }
 
 });
@@ -282,12 +282,9 @@ $(document).ready(function(){
 
 //FOR SPELLING PLAYER
  function createWordPlan(array) {
-  $('#chars').empty();
-  $('#first').empty();
-  $('#second').empty();
-  $('#third').empty();
-  $('#chars').css('display', 'block');
-  $('#message').css('display', 'block');
+  $('#chars, #first, #second, #third').empty();
+  $('#chars, #message, .container-canvas').css('display', 'block');
+
 
   var playerwordRef = dbRef.child("playerword");
   playerwordRef.set({
@@ -342,14 +339,9 @@ $(document).ready(function(){
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
 
-  // While there remain elements to shuffle...
   while (0 !== currentIndex) {
-
-    // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;
-
-    // And swap it with the current element.
     temporaryValue = array[currentIndex];
     array[currentIndex] = array[randomIndex];
     array[randomIndex] = temporaryValue;
@@ -357,7 +349,7 @@ function shuffle(array) {
 
   return array;
 }
-//FOR PAINTING PLAYER
+
 function createPaintPlan(message) {
 
 $('#intro').text("Måla en bild som föreställer:");
@@ -388,19 +380,18 @@ $('.container-canvas').css('display', 'block');
    item.appendTo('#colorholder');
  }
 
- //Keep track of if the mouse is up or down
+
  myCanvas.onmousedown = function () {mouseDown = 1;};
  myCanvas.onmouseout = myCanvas.onmouseup = function () {
    mouseDown = 0; lastPoint = null;
  };
 
- //Draw a line from the mouse's last position to its current position
  var drawLineOnMouseMove = function(e) {
    if (!mouseDown) return;
 
    e.preventDefault();
 
-   // Bresenham's line algorithm. We use this to ensure smooth lines are drawn
+
    var offset = $('canvas').offset();
    var x1 = Math.floor((e.pageX - offset.left) / pixSize - 1),
      y1 = Math.floor((e.pageY - offset.top) / pixSize - 1);
@@ -409,7 +400,7 @@ $('.container-canvas').css('display', 'block');
    var dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
    var sx = (x0 < x1) ? 1 : -1, sy = (y0 < y1) ? 1 : -1, err = dx - dy;
    while (true) {
-     //write the pixel into Firebase, or if we are drawing white, remove the pixel
+
      pixelDataRef.child(x0 + ":" + y0).set(currentColor === "fff" ? null : currentColor);
 
      if (x0 == x1 && y0 == y1) break;
@@ -428,8 +419,6 @@ $('.container-canvas').css('display', 'block');
  $(myCanvas).mousemove(drawLineOnMouseMove);
  $(myCanvas).mousedown(drawLineOnMouseMove);
 
- // Add callbacks that are fired any time the pixel data changes and adjusts the canvas appropriately.
- // Note that child_added events will be fired for initial pixel data as well.
  var drawPixel = function(snapshot) {
    var coords = snapshot.key().split(":");
    myContext.fillStyle = "#" + snapshot.val();

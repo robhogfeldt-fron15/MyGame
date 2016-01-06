@@ -121,11 +121,11 @@ body {
 }
 
 .board{
-  background-color: #446cb3;
+
   padding: 50px;
 }
 .chars{
-  background-color: #52b3d9;
+
   padding: 50px;
 }
 #drawing-canvas{
@@ -164,3 +164,7 @@ body {
   margin: 1px;
   display: inline-block;
   border: 3px solid black; }
+
+  .panel-content{
+    height: 80px
+  }
