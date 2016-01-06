@@ -73,15 +73,19 @@ password    : $("#pwd").val(),
       console.log("Login Failed!", error);
   } else {
     console.log("Login Success!:", authData);
-    window.location.href = './views/profile.html';
+    window.location.href = './profile.html';
   }
 })
+return false;
 });
 
 //GET ALL LOGGED IN USERS
 function listLoggedInUsers() {
   var list = $('<ul/>').appendTo('#showusers');
+  var t = $('#table');
       dbRef.child("users").once('value', function(dataSnapshot) {
+
+
 
   var users = dataSnapshot.val();
   if (users) {
@@ -89,17 +93,18 @@ function listLoggedInUsers() {
     var li;
     var me =  dbRef.getAuth().password.email;
       if (val.email !== me) {
-        var li = $('<li/>')
+        var li = $('<td/>')
         .attr('id', users[i].uid)
             .addClass('playUser')
-            .appendTo(list)
+            .appendTo(t)
             .text(val.email)
         }
       });
     }
 
-    $('#showusers').on('click','li', function(e){
+    $('#table').on('click','td', function(e){
       var uid = e.target.id;
+      alert(uid);
         createGame(uid);
     });
 });
@@ -188,8 +193,8 @@ function createBricks(line, length) {
 function updateFirebaseAdd(myWord, parentId) {
   var correct ="";
   var playerwordRef = new Firebase('https://fron15game.firebaseio.com/playerword/' + parentId);
-playerwordRef.once("value", function(argument) {
-  // body...
+  playerwordRef.once("value", function(argument) {
+
   var arg = argument.val();
   correct = arg.correctWord;
 })
@@ -259,16 +264,15 @@ function switchResult(line, char, dropIndex){
 
 //SET-UP FIREBASE-LISTENERS
 $(document).ready(function(){
+  $('#pl1').text(me.password.email);
+  $('#intro').text("Utmana en inloggad användare genom att klicka i listan till vänster");
   $('.container-canvas').css('display', 'none');
-  $('#chars').css('display', 'none');
-  $('#message').css('display', 'none');
-
-  dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_changed", function(message) {
+  $('#chars, #message').css('display', 'none');
 
 
-     var sender = message.val();
-
-     createWordPlan(sender);
+   dbRef.child("users/" + dbRef.getAuth().uid +"/gameinvite").on("child_changed", function(message) {
+   var sender = message.val();
+  createWordPlan(sender);
    });
 });
 
@@ -300,6 +304,8 @@ $(document).ready(function(){
       correctWord : array.third
     }
   });
+
+
 
   $.each(array, function( i, l ){
       var line = "#" + i;
@@ -333,11 +339,29 @@ $(document).ready(function(){
 
 }
 
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
 
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 //FOR PAINTING PLAYER
 function createPaintPlan(message) {
 
-$('#role').text(message);
+$('#intro').text("Måla en bild som föreställer:");
+$('#mission').text(message);
 $('#chars').css('display', 'none');
 $('#message').css('display', 'none');
 $('.container-canvas').css('display', 'block');
